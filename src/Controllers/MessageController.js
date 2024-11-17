@@ -11,28 +11,28 @@ module.exports = async function (bot, message, user) {
     const userId = message.from.id;
     const text = message.text;
 
-    // Fetch the list of categories and products without a parent category
-    let categoryList = await categories.find({ category_id: null });
-    let productList = await products.find({ category_id: null });
+    const categoryList = await categories.find({ category_id: null });
+    const productList = await products.find({ category_id: null });
+    const total = [...categoryList, ...productList];
 
-    let total = [...categoryList, ...productList];
-
-    // Find the matched item based on user input
     const matchedItem = total.find((item) => item.name === text);
 
-    // Handle post command
-    if (text === "/post") {
-      if (message.reply_to_message) {
-        const admin = await admins.findOne({ user_id: user.user_id });
-        if (admin) {
-          await ad(
-            bot,
-            message.reply_to_message.message_id,
-            user.user_id,
-            message.reply_to_message.reply_markup
-          );
-        }
+    const categoryList1 = await categories.find({ category_id: { $ne: null } });
+    const matchedCategory = categoryList1.find(
+      (category) => category.name === text
+    );
+
+    if (text === "/post" && message.reply_to_message) {
+      const admin = await admins.findOne({ user_id: user.user_id });
+      if (admin) {
+        await ad(
+          bot,
+          message.reply_to_message.message_id,
+          user.user_id,
+          message.reply_to_message.reply_markup
+        );
       }
+      return;
     }
 
     // Handle feedback request
@@ -54,58 +54,111 @@ module.exports = async function (bot, message, user) {
       };
       await bot.sendMessage(
         userId,
-        `Ushbu bot haqida takliflaringiz va bot ni misollar bo'yicha murojaatlar yuborishingiz mumkin. (<i>Masalan: Islom Abdujabborov</i>)`,
+        "Ushbu bot haqida takliflaringiz va bot ni misollar bo'yicha murojaatlar yuborishingiz mumkin. (<i>Masalan: Islom Abdujabborov</i>)",
         {
           reply_markup: keyboard,
           parse_mode: "HTML",
         }
       );
-    } else if (
-      user.step === "go" &&
-      (text === "📊 Kitob yechimlari" ||
-        text === "🛒 Заказать" ||
-        text === "🛒 Order")
-    ) {
-      await startOrderController(bot, message, user);
-    } else if (["🗂 Menu", "🗂 Меню", "Menu"].includes(text)) {
-      await Menu(bot, message, user);
-    } else if (user.step === "go" && text === "📚 Kitoblar") {
-      await OrdersController(bot, message, user);
-    } else if (matchedItem) {
-      let categoryList1 = await categories.find({
+      return; // Exit after sending feedback message
+    }
+
+    // Handle order and menu requests
+    if (user.step === "go") {
+      if (["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(text)) {
+        await startOrderController(bot, message, user);
+        return;
+      }
+      if (["🗂 Menu", "🗂 Меню", "Menu"].includes(text)) {
+        await Menu(bot, message, user);
+        return;
+      }
+      if (text === "📚 Kitoblar") {
+        await OrdersController(bot, message, user);
+        return;
+      }
+    }
+
+    // Handle matching item and fetch corresponding categories and products
+    if (matchedItem) {
+      const categoryList1 = await categories.find({
         category_id: matchedItem.id,
       });
 
-      console.log(categoryList1, 999); // Log the filtered categories
-
       if (categoryList1.length > 0) {
-        // Create the keyboard with subcategories and additional buttons
+        // Initialize the keyboard for categories
         const keyboard = {
-          keyboard: [
-            ...categoryList1.map((category) => [
-              {
-                text: category.name,
-              },
-            ]),
-            [
-              {
-                text: "⬅️ Ortga", // Back button
-              },
-              {
-                text: "🔝 Davom etish", // Continue button
-              },
-            ],
-          ],
+          keyboard: [],
           resize_keyboard: true,
           one_time_keyboard: true,
         };
+
+        for (let i = 0; i < categoryList1.length; i += 2) {
+          const row = [];
+
+          row.push({
+            text: categoryList1[i].name,
+          });
+
+          if (categoryList1[i + 1]) {
+            row.push({
+              text: categoryList1[i + 1].name,
+            });
+          }
+
+          keyboard.keyboard.push(row);
+        }
+
+        keyboard.keyboard.push([
+          { text: "⬅️ Ortga" },
+          { text: "🔝 Davom etish" },
+        ]);
 
         await bot.sendMessage(userId, "Quyidagilardan birini tanlang", {
           reply_markup: keyboard,
         });
       } else {
-        await bot.sendMessage(userId, "❌ Bunday kategoriya topilmadi");
+        await bot.sendMessage(
+          userId,
+          "❌ Bunday kategoriya yoki mahsulot topilmadi"
+        );
       }
+      return;
+    } else if (matchedCategory) {
+      let keyboard = {
+        inline_keyboard: [[]],
+      };
+
+      const categoryList2 = await products.find({
+        category_id: matchedCategory.id,
+      });
+
+      for (let i = 0; i < categoryList2.length; i += 2) {
+        let newRow = [];
+
+        newRow.push({
+          text: categoryList2[i].name,
+          callback_data: `${categoryList2[i].price ? "product" : "category"}#${
+            categoryList2[i].id
+          }`,
+        });
+
+        if (categoryList2[i + 1]) {
+          newRow.push({
+            text: categoryList2[i + 1].name,
+            callback_data: `${
+              categoryList2[i + 1].price ? "product" : "category"
+            }#${categoryList2[i + 1].id}`,
+          });
+        }
+
+        keyboard.inline_keyboard.push(newRow);
+      }
+
+      await bot.sendMessage(userId, `Quyidagi rasimlardan birini tanlang👇`, {
+        reply_markup: keyboard,
+        parse_mode: "HTML",
+      });
     }
   } catch (e) {
     console.error("Error:", e);

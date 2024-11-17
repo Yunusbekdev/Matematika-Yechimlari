@@ -26,26 +26,9 @@ module.exports = async function (bot, message, user) {
 
     const productCaption = `🧑🏻‍🎓 Ustoz: Islom Abdujabborov`;
 
-    const keyboard = {
-      inline_keyboard: [],
-    };
-
     const category = await categories.findOne({ id: product.category_id });
 
     let backData = category ? `category#${category.id}` : `menu`;
-
-    keyboard.inline_keyboard.push([
-      {
-        text: "⬅️ Ortga",
-        callback_data: backData,
-      },
-    ]);
-    keyboard.inline_keyboard.push([
-      {
-        text: "🔝 Davom etish",
-        callback_data: `menu`,
-      },
-    ]);
 
     await users.findOneAndUpdate({ user_id: userId }, { step: "go" });
 
@@ -56,7 +39,6 @@ module.exports = async function (bot, message, user) {
 
     await bot.sendPhoto(userId, product?.pic, {
       parse_mode: "HTML",
-      reply_markup: keyboard,
       caption: productCaption,
       disable_notification: true,
     });

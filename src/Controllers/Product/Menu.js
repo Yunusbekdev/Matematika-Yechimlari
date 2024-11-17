@@ -21,7 +21,6 @@ module.exports = async function (bot, message, user) {
       one_time_keyboard: true,
     };
 
-    // Add the first category to the keyboard, if available
     if (categoryList.length > 0) {
       keyboard.keyboard.push([
         {
@@ -31,10 +30,8 @@ module.exports = async function (bot, message, user) {
       ]);
     }
 
-    // Combine categories and products into a single array
     let total = [...categoryList, ...productList];
 
-    // Add categories and products to the keyboard
     for (let i = 0; i < total.length; i++) {
       keyboard.keyboard.push([
         {
@@ -50,7 +47,7 @@ module.exports = async function (bot, message, user) {
 
     await bot.sendMessage(
       userId,
-      `${text}, <a href="https://telegra.ph/Dostlik-Burger-11-03">.</a>`,
+      `${text},Quydagi kategoriyalardan birini tanlang!`,
       {
         reply_markup: keyboard,
         parse_mode: "HTML",

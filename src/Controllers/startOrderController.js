@@ -41,9 +41,6 @@ module.exports = async function (bot, message, user) {
     // Add order menu buttons
     keyboard.keyboard.push([
       {
-        text: btns.orders,
-      },
-      {
         text: btns.comment,
       },
     ]);
