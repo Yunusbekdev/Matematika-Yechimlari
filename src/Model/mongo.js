@@ -11,7 +11,9 @@ require("./Orders");
 
 module.exports = async function () {
   try {
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(MONGO_URL, {
+      serverSelectionTimeoutMS: 20000, // 20 soniya
+    });
   } catch (err) {
     console.log("Mongoose Error", err + "");
   }
