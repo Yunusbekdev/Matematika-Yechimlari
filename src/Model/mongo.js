@@ -11,9 +11,10 @@ require("./Orders");
 
 module.exports = async function () {
   try {
-    await mongoose.connect(MONGO_URL, {
-      serverSelectionTimeoutMS: 20000, // 20 soniya
-    });
+    mongoose
+      .connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => console.log("Database connected!"))
+      .catch((err) => console.error("Database connection error:", err));
   } catch (err) {
     console.log("Mongoose Error", err + "");
   }
