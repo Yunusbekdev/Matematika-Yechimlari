@@ -10,23 +10,30 @@ module.exports = async function admin() {
 
   bot.on("message", async (message) => {
     const userId = message.from.id;
-    bot
-      .getChatMember(-1001055685828, userId)
-      .then((response) => {
-        const status = response.status;
-        if (status === "left" || status === "kicked") {
-          bot.sendMessage(userId, "❌ Foydalanuvchi kanalga obuna bo'lmagan.");
-        } else {
-          bot.sendMessage(userId, "✅ Foydalanuvchi kanal a'zosi.");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
 
-    const admin = await admins.findOne({
-      user_id: `${userId}`,
-    });
+    try {
+      const response = await bot.getChatMember(-1001055685828, userId);
+      const status = response.status;
+
+      if (status === "left" || status === "kicked") {
+        await bot.sendMessage(
+          userId,
+          "❌ Foydalanuvchi kanalga obuna bo'lmagan."
+        );
+      } else {
+        await bot.sendMessage(userId, "✅ Foydalanuvchi kanal a'zosi.");
+      }
+    } catch (error) {
+      if (error.response && error.response.error_code === 400) {
+        console.error("Chat not found or bot not in chat:", error);
+        // Handle the specific case where the chat is not found
+        await bot.sendMessage(userId, "❌ Kanalga ulanishda xato.");
+      } else {
+        console.error("An error occurred:", error);
+      }
+    }
+
+    const admin = await admins.findOne({ user_id: `${userId}` });
     if (admin) {
       await MessageController(bot, message, admin);
     }

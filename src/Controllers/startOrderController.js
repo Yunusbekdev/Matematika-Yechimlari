@@ -1,6 +1,6 @@
 const categories = require("../Model/Categories");
 const products = require("../Model/Product");
-const { startOrderMenu, Menu } = require("./Texts");
+const { startOrderMenu } = require("./Texts");
 
 module.exports = async function (bot, message, user) {
   try {

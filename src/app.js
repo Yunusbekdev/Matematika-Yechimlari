@@ -1,7 +1,6 @@
 const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 const { TOKEN } = require("../config");
-const users = require("./Model/Users");
 const mongo = require("./Model/mongo");
 const admin = require("./Admin/admin");
 const products = require("./Model/Product");
@@ -9,6 +8,7 @@ const Menu = require("./Controllers/Product/Menu");
 const CallbackController = require("./Admin/Controllers/CallbackController");
 const MenuController = require("./Controllers/Order/MenuController");
 const MessageController = require("./Controllers/MessageController");
+const users = require("./Model/Users");
 
 // Initialize Express app
 const app = express();
