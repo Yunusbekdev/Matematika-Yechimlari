@@ -1,3 +1,4 @@
+const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 const { TOKEN } = require("../config");
 const users = require("./Model/Users");
@@ -9,10 +10,22 @@ const CallbackController = require("./Admin/Controllers/CallbackController");
 const MenuController = require("./Controllers/Order/MenuController");
 const MessageController = require("./Controllers/MessageController");
 
+// Initialize Express app
+const app = express();
 const bot = new TelegramBot(TOKEN, { polling: true });
 
+// Connect to MongoDB
 mongo();
 
+// Middleware to handle incoming requests
+app.use(express.json());
+
+// Basic route to check if the server is running
+app.get("/", (req, res) => {
+  res.send("Telegram Bot is running...");
+});
+
+// Telegram bot message handler
 bot.on("message", async (message) => {
   try {
     let userId = message.from.id;
@@ -50,6 +63,7 @@ bot.on("message", async (message) => {
   }
 });
 
+// Channel post handler
 bot.on("channel_post", async (message) => {
   try {
     const data = message?.data;
@@ -66,6 +80,7 @@ bot.on("channel_post", async (message) => {
   }
 });
 
+// Callback query handler
 bot.on("callback_query", async (callbackQuery) => {
   try {
     const userId = callbackQuery.from.id;
@@ -109,6 +124,13 @@ bot.on("callback_query", async (callbackQuery) => {
   }
 });
 
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+// Execute admin function
 (async () => {
   await admin();
 })();
