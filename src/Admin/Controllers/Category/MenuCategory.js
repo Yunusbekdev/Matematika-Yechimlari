@@ -28,16 +28,28 @@ module.exports = async function (bot, message, user) {
       inline_keyboard: [],
     };
 
-    // Push each item as a new row in the keyboard
-    for (let i = 0; i < items.length; i++) {
-      keyboard.inline_keyboard.push([
-        {
-          text: items[i].name,
-          callback_data: `${items[i].price ? "product" : "category"}#${
-            items[i].id
+    // Group items into pairs for side-by-side buttons
+    for (let i = 0; i < items.length; i += 2) {
+      const row = [];
+      // Add the first button
+      row.push({
+        text: items[i].name,
+        callback_data: `${items[i].price ? "product" : "category"}#${
+          items[i].id
+        }`,
+      });
+
+      // Add the second button if it exists
+      if (i + 1 < items.length) {
+        row.push({
+          text: items[i + 1].name,
+          callback_data: `${items[i + 1].price ? "product" : "category"}#${
+            items[i + 1].id
           }`,
-        },
-      ]);
+        });
+      }
+
+      keyboard.inline_keyboard.push(row);
     }
 
     // Add navigation buttons

@@ -140,10 +140,6 @@ module.exports = async function (bot, message, admin) {
         await DeleteProduct(bot, message, admin, productId);
       } else if (step == "name") {
         await ProductUpdateName(bot, message, admin, productId);
-      } else if (step == "price") {
-        await ProductUpdateDescription(bot, message, admin, productId);
-      } else if (step == "des") {
-        await ProductUpdateImg(bot, message, admin, productId);
       } else if (step == "pic") {
         await ProductImg(bot, message, admin, productId);
       } else if (step == "done" && text == "Saqlash") {
