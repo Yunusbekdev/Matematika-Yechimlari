@@ -1,8 +1,10 @@
+const admins = require("../../../Model/Admins");
 const categories = require("../../../Model/Categories");
 
-module.exports = async function (bot, message, category_id) {
+module.exports = async function (bot, message, admin, category_id) {
   try {
     const userId = message.from.id;
+    const text = message.text;
     let categoryList = [];
 
     if (category_id) {
@@ -24,20 +26,12 @@ module.exports = async function (bot, message, category_id) {
       ],
     };
 
-    for (let i = 0; i < categoryList.length; i += 2) {
-      const row = [];
-
-      row.push({
-        text: categoryList[i].name,
-      });
-
-      if (i + 1 < categoryList.length) {
-        row.push({
-          text: categoryList[i + 1].name,
-        });
-      }
-
-      keyboard.keyboard.push(row);
+    for (let category of categoryList) {
+      keyboard.keyboard.push([
+        {
+          text: category.name,
+        },
+      ]);
     }
 
     keyboard.keyboard.push([
@@ -66,6 +60,6 @@ module.exports = async function (bot, message, category_id) {
       });
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.log(err + "");
   }
 };

@@ -6,39 +6,44 @@ module.exports = async function (bot, message, user) {
   try {
     const userId = message.from.id;
 
-    // Fetch categories and products
     let categoryList = await categories.find({ category_id: null });
     let productList = await products.find({ category_id: null });
 
-    // Initialize the keyboard
     let keyboard = {
       resize_keyboard: true,
       keyboard: [],
     };
 
-    // Add categories to the keyboard side by side
+    // Function to add buttons to the keyboard in rows
+    const addButtonsToKeyboard = (items) => {
+      for (let i = 0; i < items.length; i += 3) {
+        const row = [];
+        for (let j = 0; j < 3; j++) {
+          if (items[i + j]) {
+            row.push({
+              text: items[i + j].name,
+              callback_data: `item#${items[i + j].id}`,
+            });
+          }
+        }
+        keyboard.keyboard.push(row);
+      }
+    };
+
+    // Add categories to keyboard
     if (categoryList.length > 0) {
-      const categoryRow = categoryList.map((category) => ({
-        text: category.name,
-        callback_data: `category#${category.id}`,
-      }));
-      keyboard.keyboard.push(categoryRow);
+      addButtonsToKeyboard(categoryList);
     }
 
-    // Add products to the keyboard
+    // Add products to keyboard
     if (productList.length > 0) {
-      const productRow = productList.map((product) => ({
-        text: product.name,
-        callback_data: `product#${product.id}`,
-      }));
-      keyboard.keyboard.push(productRow);
+      addButtonsToKeyboard(productList);
     }
 
-    // Add additional buttons from startOrderMenu
+    // Add additional button for comments
     let msg = startOrderMenu(user);
     let { btns } = msg;
 
-    // Add order menu buttons
     keyboard.keyboard.push([
       {
         text: btns.comment,

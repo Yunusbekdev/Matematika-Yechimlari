@@ -3,7 +3,7 @@ const { ADMIN_TOKEN } = require("../../config");
 const MessageController = require("./Controllers/MessageController");
 const admins = require("../Model/Admins");
 
-module.exports = async function admin()   {
+module.exports = async function admin() {
   const bot = new TelegramBot(ADMIN_TOKEN, {
     polling: true,
   });
