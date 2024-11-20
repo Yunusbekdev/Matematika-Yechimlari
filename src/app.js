@@ -44,11 +44,11 @@ bot.on("message", async (message) => {
         "🌟 Salom! Men **Yanni**, matematik yechimlaringiz uchun yordamchingizman!\n\n" +
           "Matematika bo'yicha savollaringizni berishingiz mumkin, men esa ularni yechishda sizga yordam beraman.\n\n" +
           "Nima savollaringiz bor? Quyidagi mavzular bo'yicha yordam bera olaman:\n" +
-          "- **Algebra**\n" +
-          "- **Geometriya**\n" +
-          "- **Statistika**\n" +
-          "- **Hisoblash va ko'paytirish**\n" +
-          "- **Matematik masalalar**\n\n" +
+          "- Algebra\n" +
+          "- Geometriya\n" +
+          "- Statistika\n" +
+          "- Hisoblash va ko'paytirish\n" +
+          "- Matematik masalalar\n\n" +
           "Savollaringizni yozing va men sizga tezda javob beraman! 🤓"
       );
     } else if (user.step == "go") {

@@ -35,7 +35,6 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    // Handle feedback request
     if (
       ["✍️ Fikr bildirish", "✍️ Обратная связь", "✍️ Leave comment"].includes(
         text
@@ -135,13 +134,13 @@ module.exports = async function (bot, message, user) {
 
         newRow.push({
           text: categoryList2[i].name,
-          callback_data: `product#${categoryList2[i].id}`, // Removed price related part
+          callback_data: `product#${categoryList2[i].id}`,
         });
 
         if (categoryList2[i + 1]) {
           newRow.push({
             text: categoryList2[i + 1].name,
-            callback_data: `product#${categoryList2[i + 1].id}`, // Removed price related part
+            callback_data: `product#${categoryList2[i + 1].id}`,
           });
         }
 

@@ -6,7 +6,6 @@ const ProductAdd = require("./ProductAdd");
 module.exports = async (bot, message, admin) => {
   try {
     const userId = message.from.id;
-    const text = message.text;
 
     let categoryId = admin.step.split("#")[2];
 
