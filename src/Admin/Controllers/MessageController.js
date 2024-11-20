@@ -10,8 +10,6 @@ const ProductCategory = require("./Product/ProductCategory");
 const ProductCategoryBack = require("./Product/ProductCategoryBack");
 const ProductImg = require("./Product/ProductImg");
 const ProductSaveController = require("./Product/ProductSaveController");
-const ProductUpdateDescription = require("./Product/ProductUpdateDescription");
-const ProductUpdateImg = require("./Product/ProductUpdateImg");
 const ProductUpdateName = require("./Product/ProductUpdateName");
 const SaveCategory = require("./Category/SaveCategory");
 const UsersCount = require("./UsersCount");
@@ -140,7 +138,7 @@ module.exports = async function (bot, message, admin) {
         await DeleteProduct(bot, message, admin, productId);
       } else if (step == "name") {
         await ProductUpdateName(bot, message, admin, productId);
-      } else if (step == "pic") {
+      } else if (step == "price") {
         await ProductImg(bot, message, admin, productId);
       } else if (step == "done" && text == "Saqlash") {
         await ProductSaveController(bot, message, admin);

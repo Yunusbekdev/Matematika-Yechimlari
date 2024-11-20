@@ -60,10 +60,9 @@ module.exports = async function (bot, message, user) {
           parse_mode: "HTML",
         }
       );
-      return; // Exit after sending feedback message
+      return;
     }
 
-    // Handle order and menu requests
     if (user.step === "go") {
       if (["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(text)) {
         await startOrderController(bot, message, user);
@@ -79,14 +78,12 @@ module.exports = async function (bot, message, user) {
       }
     }
 
-    // Handle matching item and fetch corresponding categories and products
     if (matchedItem) {
       const categoryList1 = await categories.find({
         category_id: matchedItem.id,
       });
 
       if (categoryList1.length > 0) {
-        // Initialize the keyboard for categories
         const keyboard = {
           keyboard: [],
           resize_keyboard: true,
@@ -126,7 +123,7 @@ module.exports = async function (bot, message, user) {
       return;
     } else if (matchedCategory) {
       let keyboard = {
-        inline_keyboard: [[]],
+        inline_keyboard: [],
       };
 
       const categoryList2 = await products.find({
@@ -138,17 +135,13 @@ module.exports = async function (bot, message, user) {
 
         newRow.push({
           text: categoryList2[i].name,
-          callback_data: `${categoryList2[i].price ? "product" : "category"}#${
-            categoryList2[i].id
-          }`,
+          callback_data: `product#${categoryList2[i].id}`, // Removed price related part
         });
 
         if (categoryList2[i + 1]) {
           newRow.push({
             text: categoryList2[i + 1].name,
-            callback_data: `${
-              categoryList2[i + 1].price ? "product" : "category"
-            }#${categoryList2[i + 1].id}`,
+            callback_data: `product#${categoryList2[i + 1].id}`, // Removed price related part
           });
         }
 

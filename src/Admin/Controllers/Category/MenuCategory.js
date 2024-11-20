@@ -28,10 +28,8 @@ module.exports = async function (bot, message, user) {
       inline_keyboard: [],
     };
 
-    // Group items into pairs for side-by-side buttons
     for (let i = 0; i < items.length; i += 2) {
       const row = [];
-      // Add the first button
       row.push({
         text: items[i].name,
         callback_data: `${items[i].price ? "product" : "category"}#${
@@ -39,7 +37,6 @@ module.exports = async function (bot, message, user) {
         }`,
       });
 
-      // Add the second button if it exists
       if (i + 1 < items.length) {
         row.push({
           text: items[i + 1].name,
@@ -52,7 +49,6 @@ module.exports = async function (bot, message, user) {
       keyboard.inline_keyboard.push(row);
     }
 
-    // Add navigation buttons
     keyboard.inline_keyboard.push([
       {
         text: "🔝 Davom etish",

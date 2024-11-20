@@ -24,12 +24,20 @@ module.exports = async function (bot, message, admin, categoryId) {
       ],
     };
 
-    for (let category of categoryList) {
-      keyboard.keyboard.push([
-        {
-          text: category.name,
-        },
-      ]);
+    for (let i = 0; i < categoryList.length; i += 2) {
+      const row = [];
+
+      row.push({
+        text: categoryList[i].name,
+      });
+
+      if (i + 1 < categoryList.length) {
+        row.push({
+          text: categoryList[i + 1].name,
+        });
+      }
+
+      keyboard.keyboard.push(row);
     }
 
     keyboard.keyboard.push([
@@ -46,6 +54,6 @@ module.exports = async function (bot, message, admin, categoryId) {
       }
     );
   } catch (error) {
-    console.log(error + "");
+    console.error("Error:", error);
   }
 };

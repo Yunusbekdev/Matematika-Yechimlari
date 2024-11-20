@@ -10,7 +10,7 @@ module.exports = async function (bot, message, admin, productId) {
         user_id: userId,
       },
       {
-        step: `addProduct#${productId}#pic`,
+        step: `addProduct#${productId}#price`,
       }
     );
 
@@ -23,7 +23,7 @@ module.exports = async function (bot, message, admin, productId) {
       }
     );
 
-    await bot.sendMessage(userId, `<b>${text}</b>' darsni qaysi misollari?`, {
+    await bot.sendMessage(userId, `Misollarni javoblarini rasimni yuboring`, {
       reply_markup: {
         resize_keyboard: true,
         keyboard: [

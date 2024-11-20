@@ -9,14 +9,7 @@ module.exports = async function (bot, message, user) {
     let productList = await products.find({ category_id: null });
 
     let keyboard = {
-      keyboard: [
-        [
-          {
-            text: "Barcha menyular",
-            url: "https://telegra.ph/Dostlik-Burger-11-03",
-          },
-        ],
-      ],
+      keyboard: [[]],
       resize_keyboard: true,
       one_time_keyboard: true,
     };
@@ -45,14 +38,10 @@ module.exports = async function (bot, message, user) {
 
     let text = Menu(user.lang);
 
-    await bot.sendMessage(
-      userId,
-      `${text},Quydagi kategoriyalardan birini tanlang!`,
-      {
-        reply_markup: keyboard,
-        parse_mode: "HTML",
-      }
-    );
+    await bot.sendMessage(userId, `Quydagi kategoriyalardan birini tanlang!`, {
+      reply_markup: keyboard,
+      parse_mode: "HTML",
+    });
   } catch (err) {
     console.error("Error:", err);
     await bot.sendMessage(

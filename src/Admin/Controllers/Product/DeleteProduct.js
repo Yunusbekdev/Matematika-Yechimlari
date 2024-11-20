@@ -17,7 +17,7 @@ module.exports = async function (bot, message, admin, productId) {
         step: 0,
       }
     );
-    await bot.sendMessage(userId, `Tovar qo'shish bekor qilindi`);
+    await bot.sendMessage(userId, `Javob lar qo'shish bekor qilindi`);
     await HomeController(bot, message, admin);
   } catch (err) {
     console.log(err + "");
