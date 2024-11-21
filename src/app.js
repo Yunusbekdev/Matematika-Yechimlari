@@ -21,8 +21,8 @@ mongo();
 app.use(express.json());
 
 // Basic route to check if the server is running
-app.get("/", (req, res) => {
-  res.send("Telegram Bot is running...");
+app.get("/healthy", (req, res) => {
+  res.status(200).send("<b>Bot is alive🎉🥳</b>");
 });
 
 // Telegram bot message handler
