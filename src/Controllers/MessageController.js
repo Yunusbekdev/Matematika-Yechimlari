@@ -9,20 +9,25 @@ const products = require("../Model/Product");
 module.exports = async function (bot, message, user) {
   try {
     const userId = message.from.id;
-    const text = message.text;
+    const userText = message.text;
 
-    const categoryList = await categories.find({ category_id: null });
-    const productList = await products.find({ category_id: null });
-    const total = [...categoryList, ...productList];
+    // Fetch top-level categories and products
+    const [topLevelCategories, topLevelProducts] = await Promise.all([
+      categories.find({ category_id: null }),
+      products.find({ category_id: null }),
+    ]);
+    const allItems = [...topLevelCategories, ...topLevelProducts];
 
-    const matchedItem = total.find((item) => item.name === text);
+    // Match user input with categories or products
+    const matchedItem = allItems.find((item) => item.name === userText);
 
-    const categoryList1 = await categories.find({ category_id: { $ne: null } });
-    const matchedCategory = categoryList1.find(
-      (category) => category.name === text
-    );
+    const matchedCategory = await categories.findOne({
+      name: userText,
+      category_id: { $ne: null },
+    });
 
-    if (text === "/post" && message.reply_to_message) {
+    // Handle post command
+    if (userText === "/post" && message.reply_to_message) {
       const admin = await admins.findOne({ user_id: user.user_id });
       if (admin) {
         await ad(
@@ -35,125 +40,175 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
+    // Handle feedback command
     if (
       ["✍️ Fikr bildirish", "✍️ Обратная связь", "✍️ Leave comment"].includes(
-        text
+        userText
       ) &&
       user.step === "go"
     ) {
-      const keyboard = {
+      const feedbackKeyboard = {
         inline_keyboard: [
-          [
-            {
-              text: "✍️ Murojaat yozish",
-              url: "https://t.me/SAYIDATIY",
-            },
-          ],
+          [{ text: "✍️ Murojaat yozish", url: "https://t.me/SAYIDATIY" }],
         ],
       };
       await bot.sendMessage(
         userId,
         "Ushbu bot haqida takliflaringiz va bot ni misollar bo'yicha murojaatlar yuborishingiz mumkin. (<i>Masalan: Islom Abdujabborov</i>)",
-        {
-          reply_markup: keyboard,
-          parse_mode: "HTML",
-        }
+        { reply_markup: feedbackKeyboard, parse_mode: "HTML" }
       );
       return;
     }
 
+    // Handle main actions based on user step
     if (user.step === "go") {
-      if (["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(text)) {
+      if (
+        ["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(userText)
+      ) {
         await startOrderController(bot, message, user);
         return;
       }
-      if (["🗂 Menu", "🗂 Меню", "Menu"].includes(text)) {
+      if (["🗂 Menu", "🗂 Меню", "Menu"].includes(userText)) {
         await Menu(bot, message, user);
         return;
       }
-      if (text === "📚 Kitoblar") {
+      if (userText === "📚 Kitoblar") {
         await OrdersController(bot, message, user);
         return;
       }
     }
 
-    if (matchedItem) {
-      const categoryList1 = await categories.find({
-        category_id: matchedItem.id,
+    // Handle category selection
+    if (matchedCategory) {
+      const subcategories = await categories.find({
+        category_id: matchedCategory.id,
       });
 
-      if (categoryList1.length > 0) {
-        const keyboard = {
+      const productsInCategory = await products.find({
+        category_id: matchedCategory.id,
+      });
+
+      if (subcategories.length) {
+        const subcategoryKeyboard = {
           keyboard: [],
           resize_keyboard: true,
           one_time_keyboard: true,
         };
 
-        for (let i = 0; i < categoryList1.length; i += 2) {
-          const row = [];
+        for (let i = 0; i < subcategories.length; i += 3) {
+          const subcategoryRow = [];
+          for (let j = 0; j < 3; j++) {
+            if (i + j < subcategories.length) {
+              subcategoryRow.push({
+                text: subcategories[i + j].name,
+                callback_data: `subcategory#${subcategories[i + j].id}`,
+              });
+            }
+          }
+          subcategoryKeyboard.keyboard.push(subcategoryRow);
+        }
 
-          row.push({
-            text: categoryList1[i].name,
+        subcategoryKeyboard.keyboard.push([
+          {
+            text: "🔙 Ortga",
+            callback_data: `category#${matchedCategory.category_id}`,
+          },
+        ]);
+
+        await bot.sendMessage(userId, "Quyidagilardan birini tanlang:", {
+          reply_markup: subcategoryKeyboard,
+          parse_mode: "HTML",
+        });
+      } else if (productsInCategory.length > 0) {
+        const productKeyboard = {
+          inline_keyboard: [],
+        };
+
+        // Create product buttons
+        for (let i = 0; i < productsInCategory.length; i += 2) {
+          const productRow = [];
+          productRow.push({
+            text: productsInCategory[i].name,
+            callback_data: `product#${productsInCategory[i].id}`,
           });
 
-          if (categoryList1[i + 1]) {
-            row.push({
-              text: categoryList1[i + 1].name,
+          if (productsInCategory[i + 1]) {
+            productRow.push({
+              text: productsInCategory[i + 1].name,
+              callback_data: `product#${productsInCategory[i + 1].id}`,
             });
           }
 
-          keyboard.keyboard.push(row);
+          productKeyboard.inline_keyboard.push(productRow);
         }
 
-        keyboard.keyboard.push([
-          { text: "⬅️ Ortga" },
-          { text: "🔝 Davom etish" },
-        ]);
-
-        await bot.sendMessage(userId, "Quyidagilardan birini tanlang", {
-          reply_markup: keyboard,
-        });
-      } else {
         await bot.sendMessage(
           userId,
-          "❌ Bunday kategoriya yoki mahsulot topilmadi"
+          "Quyidagi mahsulotlardan birini tanlang👇",
+          {
+            reply_markup: productKeyboard,
+            parse_mode: "HTML",
+          }
         );
       }
       return;
-    } else if (matchedCategory) {
-      let keyboard = {
-        inline_keyboard: [],
-      };
+    }
 
-      const categoryList2 = await products.find({
-        category_id: matchedCategory.id,
+    // Handle matched item (product)
+    if (matchedItem) {
+      const matchedCategoryDetails = await categories.findOne({
+        id: matchedItem.id,
       });
 
-      for (let i = 0; i < categoryList2.length; i += 2) {
-        let newRow = [];
-
-        newRow.push({
-          text: categoryList2[i].name,
-          callback_data: `product#${categoryList2[i].id}`,
+      if (matchedCategoryDetails) {
+        const subcategories = await categories.find({
+          category_id: matchedCategoryDetails.id,
         });
 
-        if (categoryList2[i + 1]) {
-          newRow.push({
-            text: categoryList2[i + 1].name,
-            callback_data: `product#${categoryList2[i + 1].id}`,
+        if (subcategories.length > 0) {
+          const subcategoryKeyboard = {
+            keyboard: [],
+            resize_keyboard: true,
+            one_time_keyboard: true,
+          };
+
+          // Create keyboard rows for subcategories (3 buttons per row)
+          for (let i = 0; i < subcategories.length; i += 3) {
+            const row = [];
+            for (let j = 0; j < 3; j++) {
+              if (i + j < subcategories.length) {
+                row.push({
+                  text: subcategories[i + j].name,
+                  callback_data: `subcategory#${subcategories[i + j].id}`,
+                });
+              }
+            }
+            subcategoryKeyboard.keyboard.push(row);
+          }
+
+          subcategoryKeyboard.keyboard.push([
+            {
+              text: "🔙 Ortga",
+              callback_data: `category#${matchedCategoryDetails.category_id}`,
+            },
+          ]);
+
+          await bot.sendMessage(userId, "Quyidagilardan birini tanlang:", {
+            reply_markup: subcategoryKeyboard,
+            parse_mode: "HTML",
           });
+        } else {
+          await bot.sendMessage(
+            userId,
+            "❌ Bu kategoriyada subkategoriya yo'q."
+          );
         }
-
-        keyboard.inline_keyboard.push(newRow);
+      } else {
+        await bot.sendMessage(userId, "❌ Bunday kategoriya topilmadi.");
       }
-
-      await bot.sendMessage(userId, `Quyidagi rasimlardan birini tanlang👇`, {
-        reply_markup: keyboard,
-        parse_mode: "HTML",
-      });
     }
-  } catch (e) {
-    console.error("Error:", e);
+  } catch (error) {
+    console.error("Error:", error);
     await bot.sendMessage(
       userId,
       "A technical error occurred. Please try again later."

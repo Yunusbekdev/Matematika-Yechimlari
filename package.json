@@ -4,10 +4,8 @@
   "description": "��#\u0000 \u0000d\u0000o\u0000-\u0000s\u0000t\u0000l\u0000i\u0000k\u0000_\u0000b\u0000u\u0000r\u0000g\u0000e\u0000r\u0000\r\u0000 \u0000",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon src/dev",
-    "start": "pm2 start ecosystem.config.js",
-    "stop": "pm2 stop ecosystem.config.js",
-    "restart": "pm2 restart ecosystem.config.js"
+    "start": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js"
   },
   "keywords": [],
   "author": "",

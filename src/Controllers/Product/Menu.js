@@ -5,15 +5,19 @@ const { Menu } = require("../Texts");
 module.exports = async function (bot, message, user) {
   try {
     const userId = message.from.id;
-    let categoryList = await categories.find({ category_id: null });
-    let productList = await products.find({ category_id: null });
 
-    let keyboard = {
-      keyboard: [[]],
+    // Fetch categories and products
+    const categoryList = await categories.find({ category_id: null });
+    const productList = await products.find({ category_id: null });
+
+    // Initialize the keyboard structure
+    const keyboard = {
+      keyboard: [],
       resize_keyboard: true,
       one_time_keyboard: true,
     };
 
+    // Add first category to the keyboard if available
     if (categoryList.length > 0) {
       keyboard.keyboard.push([
         {
@@ -23,25 +27,30 @@ module.exports = async function (bot, message, user) {
       ]);
     }
 
-    let total = [...categoryList, ...productList];
+    // Combine categories and products
+    const combinedList = [...categoryList, ...productList];
 
-    for (let i = 0; i < total.length; i++) {
+    // Create buttons for categories and products
+    combinedList.forEach((item) => {
       keyboard.keyboard.push([
         {
-          text: total[i].name,
-          callback_data: `${total[i].price ? "product" : "category"}#${
-            total[i].id
-          }`,
+          text: item.name,
+          callback_data: `${item.price ? "product" : "category"}#${item.id}`,
         },
       ]);
-    }
-
-    let text = Menu(user.lang);
-
-    await bot.sendMessage(userId, `Quydagi kategoriyalardan birini tanlang!`, {
-      reply_markup: keyboard,
-      parse_mode: "HTML",
     });
+
+    const messageText = Menu(user.lang);
+
+    // Send the message with the keyboard
+    await bot.sendMessage(
+      userId,
+      messageText || "Quyidagi kategoriyalardan birini tanlang!",
+      {
+        reply_markup: keyboard,
+        parse_mode: "HTML",
+      }
+    );
   } catch (err) {
     console.error("Error:", err);
     await bot.sendMessage(

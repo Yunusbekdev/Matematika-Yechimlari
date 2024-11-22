@@ -8,26 +8,11 @@ const OrdersSchema = new mongoose.Schema({
   name: {
     type: String,
   },
-  price: {
-    type: Number,
-  },
-  description: {
-    type: String,
-  },
   pic: {
     type: String,
   },
-  totalPrice: {
-    type: Number,
-  },
-  count: {
-    type: Number,
-  },
-  delivery: {
-    type: Number,
-  },
-  date: {
-    type: Number,
+  category_id: {
+    type: String,
   },
 });
 
