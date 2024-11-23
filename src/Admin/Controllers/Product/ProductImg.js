@@ -13,7 +13,7 @@ module.exports = async function (bot, message, admin, productId) {
 
     await products.findOneAndUpdate(
       { id: productId },
-      { pic: message.photo[0].file_id }
+      { pic: message.photo[message.photo.length - 1].file_id }
     );
 
     let product = await products.findOne({ id: productId });
@@ -24,18 +24,25 @@ module.exports = async function (bot, message, admin, productId) {
     }
 
     try {
-      await bot.sendPhoto(channelId, message.photo[0].file_id);
+      await bot.sendPhoto(
+        channelId,
+        message.photo[message.photo.length - 1].file_id
+      );
     } catch (err) {
       console.error("Failed to send photo to channel:", err);
     }
 
-    await bot.sendPhoto(userId, message.photo[0].file_id, {
-      reply_markup: {
-        resize_keyboard: true,
-        keyboard: [[{ text: "Saqlash" }, { text: "⬅️ Ortga" }]],
-      },
-      parse_mode: "HTML",
-    });
+    await bot.sendPhoto(
+      userId,
+      message.photo[message.photo.length - 1].file_id,
+      {
+        reply_markup: {
+          resize_keyboard: true,
+          keyboard: [[{ text: "Saqlash" }, { text: "⬅️ Ortga" }]],
+        },
+        parse_mode: "HTML",
+      }
+    );
   } catch (err) {
     console.error("Error in processing:", err);
     if (message.from) {
