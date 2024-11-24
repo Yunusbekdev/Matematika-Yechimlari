@@ -51,7 +51,7 @@ module.exports = async function (bot, message, admin) {
         },
       ]);
 
-      await bot.sendMessage(userId, category.name, {
+      await bot.sendMessage(userId, category.name + "7777", {
         reply_markup: keyboard,
       });
     }

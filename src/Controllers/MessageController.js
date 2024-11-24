@@ -110,7 +110,7 @@ module.exports = async function (bot, message, user) {
 
         subcategoryKeyboard.keyboard.push([
           {
-            text: "🔙 Ortga",
+            text: "⬅️ Ortga",
             callback_data: `category#${matchedCategory.category_id}`,
           },
         ]);
@@ -151,7 +151,6 @@ module.exports = async function (bot, message, user) {
           }
         );
       }
-      return;
     }
 
     // Handle matched item (product)
@@ -172,7 +171,6 @@ module.exports = async function (bot, message, user) {
             one_time_keyboard: true,
           };
 
-          // Create keyboard rows for subcategories (3 buttons per row)
           for (let i = 0; i < subcategories.length; i += 3) {
             const row = [];
             for (let j = 0; j < 3; j++) {
@@ -188,7 +186,7 @@ module.exports = async function (bot, message, user) {
 
           subcategoryKeyboard.keyboard.push([
             {
-              text: "🔙 Ortga",
+              text: "⬅️ Ortga",
               callback_data: `category#${matchedCategoryDetails.category_id}`,
             },
           ]);
