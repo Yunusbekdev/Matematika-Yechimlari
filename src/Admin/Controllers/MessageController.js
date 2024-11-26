@@ -19,6 +19,7 @@ module.exports = async function (bot, message, admin) {
   try {
     const userId = message.from.id;
     const text = message.text;
+    console.log(text, 55);
 
     const [topLevelCategories, topLevelProducts] = await Promise.all([
       categories.find({ category_id: null }),
@@ -34,7 +35,7 @@ module.exports = async function (bot, message, admin) {
     });
 
     // Start command
-    if (text === "/start" && admin.step === 0) {
+    if (text === "/start") {
       await HomeController(bot, message, admin);
     }
     // Categories menu
