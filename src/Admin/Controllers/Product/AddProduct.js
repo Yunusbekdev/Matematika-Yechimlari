@@ -5,7 +5,6 @@ const products = require("../../../Model/Product");
 module.exports = async function (bot, message, admin, step) {
   try {
     const userId = message.from.id;
-    console.log(step, "categoryId");
 
     const product = await products.create({
       id: v4(),

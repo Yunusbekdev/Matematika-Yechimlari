@@ -7,8 +7,10 @@ const categories = require("../Model/Categories");
 const products = require("../Model/Product");
 
 module.exports = async function (bot, message, user) {
+  let userId; // Declare userId here
+
   try {
-    const userId = message.from.id;
+    userId = message.from.id; // Assign userId here
     const userText = message.text;
 
     // Fetch top-level categories and products
@@ -60,7 +62,7 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    // Handle main actions based on user step
+    // Main actions based on user step
     if (user.step === "go") {
       if (
         ["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(userText)
@@ -124,24 +126,35 @@ module.exports = async function (bot, message, user) {
           inline_keyboard: [],
         };
 
-        // Create product buttons
+        // Mahsulot tugmalarini yaratish
         for (let i = 0; i < productsInCategory.length; i += 2) {
           const productRow = [];
-          productRow.push({
-            text: productsInCategory[i].name,
-            callback_data: `product#${productsInCategory[i].id}`,
-          });
 
-          if (productsInCategory[i + 1]) {
+          // Birinchi mahsulot tugmasi
+          if (productsInCategory[i] && productsInCategory[i].name) {
             productRow.push({
-              text: productsInCategory[i + 1].name,
+              text: productsInCategory[i].name || "No Name", // Zaxira qiymati
+              callback_data: `product#${productsInCategory[i].id}`,
+            });
+          } else {
+            console.warn(`Missing name for product at index ${i}`);
+          }
+
+          // Ikkinchi mahsulot tugmasi mavjud bo'lsa
+          if (productsInCategory[i + 1] && productsInCategory[i + 1].name) {
+            productRow.push({
+              text: productsInCategory[i + 1].name || "No Name", // Zaxira qiymati
               callback_data: `product#${productsInCategory[i + 1].id}`,
             });
           }
 
-          productKeyboard.inline_keyboard.push(productRow);
+          // Faqat tugmalar to'ldirilgan bo'lsa qo'shish
+          if (productRow.length > 0) {
+            productKeyboard.inline_keyboard.push(productRow);
+          }
         }
 
+        // Botga yuborish
         await bot.sendMessage(
           userId,
           "Quyidagi mahsulotlardan birini tanlang👇",
@@ -153,7 +166,6 @@ module.exports = async function (bot, message, user) {
       }
     }
 
-    // Handle matched item (product)
     if (matchedItem) {
       const matchedCategoryDetails = await categories.findOne({
         id: matchedItem.id,
@@ -207,6 +219,7 @@ module.exports = async function (bot, message, user) {
     }
   } catch (error) {
     console.error("Error:", error);
+    // Now userId is defined here
     await bot.sendMessage(
       userId,
       "A technical error occurred. Please try again later."
