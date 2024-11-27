@@ -12,6 +12,7 @@ module.exports = async function admin() {
     const userId = message.from.id;
 
     const admin = await admins.findOne({ user_id: `${userId}` });
+    console.log(admin, 99999999999);
 
     if (admin) {
       await MessageController(bot, message, admin);
