@@ -24,7 +24,7 @@ module.exports = async function (bot, message, user) {
 
     // await bot.deleteMessage(userId, messageId);
 
-    const productCaption = `🧑🏻‍🎓 Ustoz: ${product?.teacher}`;
+    const productCaption = `${product?.teacher}`;
 
     const category = await categories.findOne({ id: product.category_id });
 
