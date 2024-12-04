@@ -14,35 +14,47 @@ module.exports = async function (bot, message, user) {
       keyboard: [],
     };
 
-    // Function to add buttons to the keyboard in rows
     const addButtonsToKeyboard = (items) => {
       for (let i = 0; i < items.length; i += 3) {
         const row = [];
         for (let j = 0; j < 3; j++) {
           if (items[i + j]) {
-            row.push({
-              text: items[i + j].name,
-              callback_data: `item#${items[i + j].id}`,
-            });
+            if (items[i + j].name) {
+              row.push({
+                text: items[i + j].name,
+              });
+            } else {
+              console.warn(
+                `Item at index ${i + j} does not have a 'name' property.`
+              );
+            }
           }
         }
-        keyboard.keyboard.push(row);
+        if (row.length > 0) {
+          keyboard.keyboard.push(row);
+        }
       }
     };
 
-    // Add categories to keyboard
     if (categoryList.length > 0) {
       addButtonsToKeyboard(categoryList);
+    } else {
+      console.warn("No categories found.");
     }
 
-    // Add products to keyboard
     if (productList.length > 0) {
       addButtonsToKeyboard(productList);
+    } else {
+      console.warn("No products found.");
     }
 
-    // Add additional button for comments
     let msg = startOrderMenu(user);
     let { btns } = msg;
+
+    if (!btns.comment) {
+      console.error("btns.comment is not defined.");
+      return;
+    }
 
     keyboard.keyboard.push([
       {
@@ -54,6 +66,6 @@ module.exports = async function (bot, message, user) {
       reply_markup: keyboard,
     });
   } catch (err) {
-    console.log(err + "");
+    console.error("Error:", err);
   }
 };

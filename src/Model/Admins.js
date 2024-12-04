@@ -8,6 +8,10 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     default: 0,
   },
+  role: {
+    type: String,
+    default: "admin",
+  },
 });
 
 const admins = mongoose.model("admins", AdminSchema);

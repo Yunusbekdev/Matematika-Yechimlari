@@ -1,6 +1,6 @@
 const { v4 } = require("uuid");
-const admins = require("../../../Model/Admins");
 const products = require("../../../Model/Product");
+const users = require("../../../Model/Users");
 
 module.exports = async function (bot, message, admin, step) {
   try {
@@ -11,9 +11,9 @@ module.exports = async function (bot, message, admin, step) {
       category_id: step !== "undefined" ? step : undefined,
     });
 
-    await admins.findOneAndUpdate(
+    await users.findOneAndUpdate(
       {
-        user_id: userId,
+        user_id: admin?.user_id,
       },
       {
         step: `addProduct#${product.id}#name`,

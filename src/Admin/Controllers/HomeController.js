@@ -1,16 +1,18 @@
 const admins = require("../../Model/Admins");
+const users = require("../../Model/Users");
 
 module.exports = async function (bot, message, admin) {
   try {
     const userId = message.from.id;
-    await admins.findOneAndUpdate(
-      {
-        user_id: userId,
-      },
-      {
-        step: 0,
-      }
-    );
+
+    // await users.findOneAndUpdate(
+    //   {
+    //     user_id: userId,
+    //   },
+    //   {
+    //     step: 0,
+    //   }
+    // );
 
     let keyboard = {
       resize_keyboard: true,

@@ -1,13 +1,12 @@
-const admins = require("../../../Model/Admins");
 const products = require("../../../Model/Product");
+const users = require("../../../Model/Users");
 
 module.exports = async function (bot, message, admin, productId) {
   try {
     const userId = message.from.id;
-    const text = message.text;
-    await admins.findOneAndUpdate(
+    await users.findOneAndUpdate(
       {
-        user_id: userId,
+        user_id: admin?.user_id,
       },
       {
         step: `addProduct#${productId}#price`,
@@ -23,7 +22,7 @@ module.exports = async function (bot, message, admin, productId) {
       }
     );
 
-    await bot.sendMessage(userId, `Misollarni yechgan ustozni ismni kiriting`, {
+    await bot.sendMessage(userId, `Misollarni javoblarini rasimini yuboring`, {
       reply_markup: {
         resize_keyboard: true,
         keyboard: [

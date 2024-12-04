@@ -6,7 +6,6 @@ module.exports = async function (bot, message, user) {
   try {
     const userId = message.from.id;
     const data = message.data;
-    const messageId = message.message.message_id;
 
     const type = data.split("#")[0];
     const id = data.split("#")[1];
@@ -22,9 +21,7 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    // await bot.deleteMessage(userId, messageId);
-
-    const productCaption = `${product?.teacher}`;
+    const productCaption = `  ${product?.teacher}`;
 
     const category = await categories.findOne({ id: product.category_id });
 
@@ -34,13 +31,24 @@ module.exports = async function (bot, message, user) {
       await bot.sendMessage(userId, "❌ Rasm topilmadi");
       return;
     }
+    if (typeof product.pic !== "string" || product.pic.trim() === "") {
+      await bot.sendMessage(
+        userId,
+        "❌ Rasm fayl identifikatori yoki URL noto'g'ri."
+      );
+      return;
+    }
 
-    await bot.sendPhoto(userId, product?.pic, {
+    await bot.sendPhoto(userId, product.pic, {
       parse_mode: "HTML",
       caption: productCaption,
       disable_notification: true,
     });
   } catch (err) {
     console.error("Error:", err.toString());
+    await bot.sendMessage(
+      message.from.id,
+      "❌ Xato yuz berdi. Iltimos, qaytadan urinib ko'ring."
+    );
   }
 };

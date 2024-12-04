@@ -1,5 +1,5 @@
-const admins = require("../../../Model/Admins");
 const categories = require("../../../Model/Categories");
+const users = require("../../../Model/Users");
 const HomeController = require("../HomeController");
 const ProductAdd = require("./ProductAdd");
 
@@ -10,9 +10,9 @@ module.exports = async (bot, message, admin) => {
     let categoryId = admin.step.split("#")[2];
 
     if (categoryId == "all") {
-      await admins.findOneAndUpdate(
+      await users.findOneAndUpdate(
         {
-          id: userId,
+          id: admin?.user_id,
         },
         {
           step: 0,
@@ -33,9 +33,9 @@ module.exports = async (bot, message, admin) => {
       });
     }
 
-    await admins.findOneAndUpdate(
+    await users.findOneAndUpdate(
       {
-        user_id: userId,
+        user_id: admin?.user_id,
       },
       {
         step: `product#categories#${parentCategory?.id || "all"}`,

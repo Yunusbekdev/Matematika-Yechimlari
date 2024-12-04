@@ -1,26 +1,23 @@
 const ad = require("../Admin/addPost");
-const admins = require("../Model/Admins");
-const Menu = require("./Product/Menu");
 const OrdersController = require("./Orders/OrdersController");
 const startOrderController = require("./startOrderController");
 const categories = require("../Model/Categories");
 const products = require("../Model/Product");
+const users = require("../Model/Users");
 
 module.exports = async function (bot, message, user) {
-  let userId; // Declare userId here
+  let userId;
 
   try {
-    userId = message.from.id; // Assign userId here
+    userId = message.from.id;
     const userText = message.text;
 
-    // Fetch top-level categories and products
     const [topLevelCategories, topLevelProducts] = await Promise.all([
       categories.find({ category_id: null }),
       products.find({ category_id: null }),
     ]);
     const allItems = [...topLevelCategories, ...topLevelProducts];
 
-    // Match user input with categories or products
     const matchedItem = allItems.find((item) => item.name === userText);
 
     const matchedCategory = await categories.findOne({
@@ -28,9 +25,8 @@ module.exports = async function (bot, message, user) {
       category_id: { $ne: null },
     });
 
-    // Handle post command
     if (userText === "/post" && message.reply_to_message) {
-      const admin = await admins.findOne({ user_id: user.user_id });
+      const admin = await users.findOne({ user_id: user.user_id });
       if (admin) {
         await ad(
           bot,
@@ -42,7 +38,6 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    // Handle feedback command
     if (
       ["✍️ Fikr bildirish", "✍️ Обратная связь", "✍️ Leave comment"].includes(
         userText
@@ -62,16 +57,11 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    // Main actions based on user step
     if (user.step === "go") {
       if (
         ["📊 Kitob yechimlari", "🛒 Заказать", "🛒 Order"].includes(userText)
       ) {
         await startOrderController(bot, message, user);
-        return;
-      }
-      if (["🗂 Menu", "🗂 Меню", "Menu"].includes(userText)) {
-        await Menu(bot, message, user);
         return;
       }
       if (userText === "📚 Kitoblar") {
@@ -80,7 +70,6 @@ module.exports = async function (bot, message, user) {
       }
     }
 
-    // Handle category selection
     if (matchedCategory) {
       const subcategories = await categories.find({
         category_id: matchedCategory.id,
@@ -126,11 +115,9 @@ module.exports = async function (bot, message, user) {
           inline_keyboard: [],
         };
 
-        // Mahsulot tugmalarini yaratish
         for (let i = 0; i < productsInCategory.length; i += 2) {
           const productRow = [];
 
-          // Birinchi mahsulot tugmasi
           if (productsInCategory[i] && productsInCategory[i].name) {
             productRow.push({
               text: productsInCategory[i].name || "No Name", // Zaxira qiymati
@@ -140,7 +127,6 @@ module.exports = async function (bot, message, user) {
             console.warn(`Missing name for product at index ${i}`);
           }
 
-          // Ikkinchi mahsulot tugmasi mavjud bo'lsa
           if (productsInCategory[i + 1] && productsInCategory[i + 1].name) {
             productRow.push({
               text: productsInCategory[i + 1].name || "No Name", // Zaxira qiymati
@@ -148,13 +134,11 @@ module.exports = async function (bot, message, user) {
             });
           }
 
-          // Faqat tugmalar to'ldirilgan bo'lsa qo'shish
           if (productRow.length > 0) {
             productKeyboard.inline_keyboard.push(productRow);
           }
         }
 
-        // Botga yuborish
         await bot.sendMessage(
           userId,
           "Quyidagi mahsulotlardan birini tanlang👇",
@@ -219,7 +203,6 @@ module.exports = async function (bot, message, user) {
     }
   } catch (error) {
     console.error("Error:", error);
-    // Now userId is defined here
     await bot.sendMessage(
       userId,
       "A technical error occurred. Please try again later."

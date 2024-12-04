@@ -1,12 +1,12 @@
-const admins = require("../../../Model/Admins");
+const users = require("../../../Model/Users");
 
 module.exports = async function (bot, message, admin, categoryId) {
   try {
     const userId = message.from.id;
 
-    await admins.findOneAndUpdate(
+    await users.findOneAndUpdate(
       {
-        user_id: userId,
+        user_id: admin?.user_id,
       },
       {
         step: `addCategory#${categoryId}`,

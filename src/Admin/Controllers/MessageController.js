@@ -1,4 +1,3 @@
-const admins = require("../../Model/Admins");
 const categories = require("../../Model/Categories");
 const AddCategory = require("./Category/AddCategory");
 const AddProduct = require("./Product/AddProduct");
@@ -7,7 +6,6 @@ const DeleteProduct = require("./Product/DeleteProduct");
 const HomeController = require("./HomeController");
 const ProductAdd = require("./Product/ProductAdd");
 const ProductCategoryBack = require("./Product/ProductCategoryBack");
-const ProductCategory = require("./Product/ProductCategory");
 const ProductImg = require("./Product/ProductImg");
 const ProductSaveController = require("./Product/ProductSaveController");
 const ProductUpdateName = require("./Product/ProductUpdateName");
@@ -15,6 +13,7 @@ const SaveCategory = require("./Category/SaveCategory");
 const UsersCount = require("./UsersCount");
 const products = require("../../Model/Product");
 const ProductTeacherName = require("./Product/ProductTeacherName");
+const users = require("../../Model/Users");
 
 module.exports = async function (bot, message, admin) {
   try {
@@ -27,27 +26,21 @@ module.exports = async function (bot, message, admin) {
     ]);
     const allItems = [...topLevelCategories, ...topLevelProducts];
 
-    // Match user input with categories or products
     const matchedItem = allItems.find((item) => item.name === text);
     const matchedCategory = await categories.findOne({
       name: text,
       category_id: { $ne: null },
     });
 
-    // Start command
     if (text === "/start") {
       await HomeController(bot, message, admin);
-    }
-    // Categories menu
-    else if (admin.step === "0" && text === "➕ Kategoriyalar") {
-      await admins.findOneAndUpdate(
-        { user_id: userId },
+    } else if (text == "➕ Kategoriyalar") {
+      await users.findOneAndUpdate(
+        { user_id: admin?.user_id },
         { step: `categories#all` }
       );
       await CategoryController(bot, message, admin);
-    }
-    // Category handling
-    else if (admin.step?.split("#")[0] === "categories") {
+    } else if (admin.step?.split("#")[0] === "categories") {
       if (text === "➕ Qo'shish") {
         let categoryId =
           admin.step?.split("#")[1] === "all"
@@ -58,53 +51,50 @@ module.exports = async function (bot, message, admin) {
         let stepId = admin.step?.split("#")[1];
         let category = await categories.findOne({ id: stepId });
         if (stepId === "all") {
-          await admins.findOneAndUpdate({ user_id: userId }, { step: "0" });
+          await users.findOneAndUpdate(
+            { user_id: admin?.user_id },
+            { step: "0" }
+          );
           await HomeController(bot, message, admin);
           await CategoryController(bot, message, admin, category.id);
           return;
         }
-        await admins.findOneAndUpdate(
-          { user_id: userId },
+        await users.findOneAndUpdate(
+          { user_id: admin?.user_id },
           { step: `categories#${category?.category_id || "all"}` }
         );
         await CategoryController(bot, message, admin, category?.category_id);
       } else if (text === "🗑 O'chirish") {
         let stepId = admin.step.split("#")[1];
         await categories.deleteOne({ id: stepId });
-        await admins.findOneAndUpdate(
-          { user_id: userId },
+        await users.findOneAndUpdate(
+          { user_id: admin?.user_id },
           { step: `categories#${category?.category_id || "all"}` }
         );
         await CategoryController(bot, message, admin, category?.category_id);
       } else {
         let category = await categories.findOne({ name: text });
         if (category) {
-          await admins.findOneAndUpdate(
-            { user_id: userId },
+          await users.findOneAndUpdate(
+            { user_id: admin?.user_id },
             { step: `categories#${category.id}` }
           );
           await CategoryController(bot, message, admin, category.id);
         }
       }
-    }
-    // Adding a category
-    else if (admin.step?.split("#")[0] === "addCategory") {
+    } else if (admin.step?.split("#")[0] === "addCategory") {
       let categoryId =
         admin.step?.split("#")[1] === "all"
           ? undefined
           : admin.step?.split("#")[1];
       await SaveCategory(bot, message, admin, categoryId);
-    }
-    // Product handling
-    else if (admin.step === "0" && text === "📚 Mavzular") {
-      await admins.findOneAndUpdate(
-        { user_id: userId },
+    } else if (text == "📚 Mavzular") {
+      await users.findOneAndUpdate(
+        { user_id: admin?.user_id },
         { step: `product#categories#all` }
       );
       await ProductAdd(bot, message, admin);
-    }
-    // Product category selection
-    else if (admin.step?.split("#")[0] === "product") {
+    } else if (admin.step?.split("#")[0] === "product") {
       if (matchedCategory) {
         const subcategories = await categories.find({
           category_id: matchedCategory.id,
@@ -114,13 +104,12 @@ module.exports = async function (bot, message, admin) {
           category_id: matchedCategory.id,
         });
 
-        // Update the admin's step to reflect the current category context
-        await admins.findOneAndUpdate(
+        await users.findOneAndUpdate(
           {
-            user_id: userId,
+            user_id: admin?.user_id,
           },
           {
-            step: `product#categories#${matchedCategory.id}`, // Use matchedCategory.id
+            step: `product#categories#${matchedCategory.id}`,
           }
         );
 
@@ -156,7 +145,6 @@ module.exports = async function (bot, message, admin) {
             parse_mode: "HTML",
           });
         } else {
-          // If there are no subcategories, show products
           let keyboard = {
             resize_keyboard: true,
             keyboard: [
@@ -184,7 +172,6 @@ module.exports = async function (bot, message, admin) {
         }
       }
 
-      // Handle matched item (product)
       if (matchedItem) {
         const matchedCategoryDetails = await categories.findOne({
           id: matchedItem.id,
@@ -237,7 +224,6 @@ module.exports = async function (bot, message, admin) {
         }
       }
 
-      // Adding a product
       if (text === "➕ Qo'shish") {
         let step = admin.step.split("#")[2];
         step = step == "all" ? undefined : step;
@@ -245,9 +231,7 @@ module.exports = async function (bot, message, admin) {
       } else if (text === "⬅️ Ortga") {
         await ProductCategoryBack(bot, message, admin);
       }
-    }
-    // Handling product addition steps
-    else if (admin.step?.split("#")[0] === "addProduct") {
+    } else if (admin.step?.split("#")[0] === "addProduct") {
       let productId = admin.step.split("#")[1];
       let step = admin.step.split("#")[2];
 
@@ -262,9 +246,7 @@ module.exports = async function (bot, message, admin) {
       } else if (step === "done" && text === "Saqlash") {
         await ProductSaveController(bot, message, admin);
       }
-    }
-    // Users count
-    else if (admin.step === "0" && text === "👤 Foydalanuvchilari sonni") {
+    } else if (text == "👤 Foydalanuvchilari sonni") {
       await UsersCount(bot, message, admin);
     }
   } catch (err) {

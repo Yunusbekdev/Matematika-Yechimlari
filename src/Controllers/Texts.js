@@ -14,7 +14,6 @@ module.exports = class Texts {
     return {
       text: "Quydagilardan birini tanlang",
       btns: {
-        orders: "📚 Kitoblar",
         comment: "✍️ Fikr bildirish",
       },
     };
@@ -23,12 +22,6 @@ module.exports = class Texts {
   static Menu(lang) {
     if (lang == "uz") {
       return "Kategoriyalardan birini tanlang";
-    }
-    if (lang == "ru") {
-      return "Выберите одну из категорий";
-    }
-    if (lang == "eng") {
-      return "Choose one of the categories";
     }
   }
 };

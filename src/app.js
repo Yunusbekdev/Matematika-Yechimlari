@@ -4,10 +4,10 @@ const { TOKEN } = require("../config");
 const mongo = require("./Model/mongo");
 const admin = require("./Admin/admin");
 const products = require("./Model/Product");
-const Menu = require("./Controllers/Product/Menu");
-const CallbackController = require("./Admin/Controllers/CallbackController");
 const MenuController = require("./Controllers/Order/MenuController");
 const MessageController = require("./Controllers/MessageController");
+const MessageController1 = require("./Admin/Controllers/MessageController");
+const CallbackController = require("./Admin/Controllers/CallbackController");
 const users = require("./Model/Users");
 
 // Initialize Express app
@@ -25,38 +25,55 @@ app.get("/healthy", (req, res) => {
   res.status(200).send("<b>Bot is alive🎉🥳</b>");
 });
 
+// Function to check user role
+const checkUserRole = async (userId) => {
+  try {
+    const user = await users.findOne({ user_id: userId });
+    return user ? user.role : "user"; // Agar foydalanuvchi mavjud bo'lsa, uning rolini qaytarish
+  } catch (error) {
+    console.error("Error checking user role:", error);
+    return "user"; // Xato yuz berганда "user" rolini qaytarish
+  }
+};
+
 // Telegram bot message handler
 bot.on("message", async (message) => {
   try {
-    let userId = message.from.id;
-
+    const userId = message.from.id;
+    const userRole = await checkUserRole(userId);
     let user = await users.findOne({ user_id: userId });
 
+    // Faqat /start buyruğini qabul qilish
     if (message.text === "/start") {
-      if (!user) {
-        user = await users.create({ user_id: userId, step: "go" });
+      if (userRole === "admin") {
+        await MessageController1(bot, message, user);
+      } else {
+        if (!user) {
+          user = await users.create({ user_id: userId, step: "go" });
+        }
+
+        await bot.sendMessage(
+          userId,
+          "🌟 Salom! Men **Yanni**, matematik yechimlaringiz uchun yordamchingizman!\n\n" +
+            "Matematika bo'yicha savollaringizni berishingiz mumkin, men esa ularni yechishda sizga yordam beraman.\n\n" +
+            "Nima savollaringiz bor? Quyidagi mavzular bo'yicha yordam bera olaman:\n" +
+            "- Algebra\n" +
+            "- Geometriya\n" +
+            "- Statistika\n" +
+            "- Hisoblash va ko'paytirish\n" +
+            "- Matematik masalalar\n\n" +
+            "Savollaringizni yozing va men sizga tezda javob beraman! 🤓"
+        );
       }
-
-      await MenuController(bot, message, user);
-
-      await bot.sendMessage(
-        userId,
-        "🌟 Salom! Men **Yanni**, matematik yechimlaringiz uchun yordamchingizman!\n\n" +
-          "Matematika bo'yicha savollaringizni berishingiz mumkin, men esa ularni yechishda sizga yordam beraman.\n\n" +
-          "Nima savollaringiz bor? Quyidagi mavzular bo'yicha yordam bera olaman:\n" +
-          "- Algebra\n" +
-          "- Geometriya\n" +
-          "- Statistika\n" +
-          "- Hisoblash va ko'paytirish\n" +
-          "- Matematik masalalar\n\n" +
-          "Savollaringizni yozing va men sizga tezda javob beraman! 🤓"
-      );
-    } else if (user.step == "go") {
-      await MenuController(bot, message, user);
-      await MessageController(bot, message, user);
+    } else if (user) {
+      if (user.step === "go") {
+        await MenuController(bot, message, user);
+        await MessageController(bot, message, user);
+      } else {
+        await MessageController1(bot, message, user);
+      }
     } else {
-      await MenuController(bot, message, user);
-      await MessageController(bot, message, user);
+      await bot.sendMessage(userId, "Iltimos, /start buyruğini yuboring.");
     }
   } catch (err) {
     console.error("Error in message handler:", err);
@@ -73,7 +90,7 @@ bot.on("channel_post", async (message) => {
 
     const product = await products.findOne({ id });
     if (product) {
-      await products.findOneAndUpdate({ pic: product.pic });
+      await products.findOneAndUpdate({ id }, { pic: product.pic }); // Mahsulot rasmiga yangilanish
     }
   } catch (err) {
     console.error("Error in channel_post handler:", err);
@@ -90,10 +107,10 @@ bot.on("callback_query", async (callbackQuery) => {
 
     switch (data) {
       case "menu":
-        await Menu(bot, callbackQuery, user);
+        await MenuController(bot, callbackQuery, user);
         break;
       case "attribution":
-        await AttributionController(bot, callbackQuery, user);
+        await CallbackController(bot, callbackQuery, user);
         break;
       case "kitob1":
         await bot.sendDocument(
@@ -131,6 +148,6 @@ app.listen(PORT, () => {
 });
 
 // Execute admin function
-(async () => {
-  await admin();
-})();
+// (async () => {
+//   await admin();
+// })();

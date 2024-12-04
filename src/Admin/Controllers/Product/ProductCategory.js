@@ -1,5 +1,5 @@
-const admins = require("../../../Model/Admins");
 const categories = require("../../../Model/Categories");
+const users = require("../../../Model/Users");
 
 module.exports = async function (bot, message, admin) {
   try {
@@ -14,9 +14,9 @@ module.exports = async function (bot, message, admin) {
     });
 
     if (category !== null) {
-      await admins.findOneAndUpdate(
+      await users.findOneAndUpdate(
         {
-          user_id: userId,
+          user_id: admin?.user_id,
         },
         {
           step: `product#categories#${category.id}`,
@@ -51,7 +51,7 @@ module.exports = async function (bot, message, admin) {
         },
       ]);
 
-      await bot.sendMessage(userId, category.name + "7777", {
+      await bot.sendMessage(userId, category.name, {
         reply_markup: keyboard,
       });
     }

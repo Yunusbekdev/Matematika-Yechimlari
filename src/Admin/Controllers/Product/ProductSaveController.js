@@ -1,13 +1,13 @@
-const admins = require("../../../Model/Admins");
+const users = require("../../../Model/Users");
 const HomeController = require("../HomeController");
 
 module.exports = async function (bot, message, admin) {
   try {
     const userId = message.from.id;
 
-    await admins.findOneAndUpdate(
+    await users.findOneAndUpdate(
       {
-        user_id: userId,
+        user_id: admin?.user_id,
       },
       {
         step: 0,
