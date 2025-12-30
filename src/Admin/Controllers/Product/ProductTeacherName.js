@@ -10,7 +10,7 @@ module.exports = async function (bot, message, admin, productId) {
         user_id: userId,
       },
       {
-        step: `addProduct#${productId}#teacher`,
+        step: `addProduct#${productId}#price`,
       }
     );
 
@@ -19,7 +19,7 @@ module.exports = async function (bot, message, admin, productId) {
         id: productId,
       },
       {
-        name: message.text,
+        teacher: message.text,
       }
     );
 

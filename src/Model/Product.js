@@ -11,6 +11,9 @@ const ProductSchema = new mongoose.Schema({
   pic: {
     type: String,
   },
+  teacher: {
+    type: String,
+  },
   category_id: {
     type: String,
   },

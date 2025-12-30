@@ -14,6 +14,7 @@ const ProductUpdateName = require("./Product/ProductUpdateName");
 const SaveCategory = require("./Category/SaveCategory");
 const UsersCount = require("./UsersCount");
 const products = require("../../Model/Product");
+const ProductTeacherName = require("./Product/ProductTeacherName");
 
 module.exports = async function (bot, message, admin) {
   try {
@@ -254,6 +255,8 @@ module.exports = async function (bot, message, admin) {
         await DeleteProduct(bot, message, admin, productId);
       } else if (step === "name") {
         await ProductUpdateName(bot, message, admin, productId);
+      } else if (step === "teacher") {
+        await ProductTeacherName(bot, message, admin, productId);
       } else if (step === "price") {
         await ProductImg(bot, message, admin, productId);
       } else if (step === "done" && text === "Saqlash") {

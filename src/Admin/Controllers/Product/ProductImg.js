@@ -5,7 +5,18 @@ module.exports = async function (bot, message, admin, productId) {
   try {
     const userId = message.from.id;
     const channelId = -1002431600201;
-    const imgFileID = message?.photo[message?.photo?.length - 1].file_id;
+
+    // Check if message.photo exists and has elements
+    if (!message.photo || message.photo.length === 0) {
+      await bot.sendMessage(
+        userId,
+        "❌ Rasm topilmadi. Iltimos, rasm yuboring."
+      );
+      return;
+    }
+
+    // Get the last image file ID from the photo array
+    const imgFileID = message.photo[message.photo.length - 1].file_id;
 
     await admins.findOneAndUpdate(
       { user_id: userId },
@@ -13,7 +24,6 @@ module.exports = async function (bot, message, admin, productId) {
     );
 
     await products.findOneAndUpdate({ id: productId }, { pic: imgFileID });
-    console.log(imgFileID, "imgFileID", message?.photo[0].file_id);
 
     let product = await products.findOne({ id: productId });
 
@@ -22,12 +32,19 @@ module.exports = async function (bot, message, admin, productId) {
       return;
     }
 
+    // Try sending the photo to the channel
     try {
       await bot.sendPhoto(channelId, imgFileID);
     } catch (err) {
       console.error("Failed to send photo to channel:", err);
+      await bot.sendMessage(
+        userId,
+        "❌ Kanalga rasm yuborishda xato yuz berdi."
+      );
+      return; // Exit if sending to the channel fails
     }
 
+    // Send the photo back to the user
     await bot.sendPhoto(userId, imgFileID, {
       reply_markup: {
         resize_keyboard: true,
@@ -39,7 +56,7 @@ module.exports = async function (bot, message, admin, productId) {
     console.error("Error in processing:", err);
     if (message.from) {
       await bot.sendMessage(
-        userId,
+        message.from.id,
         "❌ Xato yuz berdi. Iltimos, qaytadan urinib ko'ring."
       );
     }

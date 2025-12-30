@@ -22,13 +22,11 @@ module.exports = async function (bot, message, user) {
       return;
     }
 
-    await bot.deleteMessage(userId, messageId);
+    // await bot.deleteMessage(userId, messageId);
 
-    const productCaption = `🧑🏻‍🎓 Ustoz: Islom Abdujabborov`;
+    const productCaption = `🧑🏻‍🎓 Ustoz: ${product?.teacher}`;
 
     const category = await categories.findOne({ id: product.category_id });
-
-    let backData = category ? `category#${category.id}` : `menu`;
 
     await users.findOneAndUpdate({ user_id: userId }, { step: "go" });
 
